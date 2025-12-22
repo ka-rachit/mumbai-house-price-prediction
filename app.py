@@ -92,4 +92,4 @@ if st.button("Calculate Value", type="primary", use_container_width=True):
     
     with col_res2:
         st.metric(label="Location", value=selected_region)
-        st.metric(label="Config", value=f"{bhk} BHK, {area} Sq Ft")
+       
