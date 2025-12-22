@@ -53,11 +53,24 @@ st.write("---")
 col1, col2 = st.columns(2)
 
 with col1:
-    # REGION DROPDOWN (Now much cleaner!)
-    selected_region = st.selectbox("📍 Select Region", region_options)
+    # SEARCHABLE DROPDOWN
+    # index=None makes it empty by default
+    # placeholder tells them they can type
+    selected_region = st.selectbox(
+        "📍 Location", 
+        region_options, 
+        index=None, 
+        placeholder="Type to search (e.g. Bandra, Virar)..."
+    )
 
 with col2:
     bhk = st.number_input("🛏️ Bedrooms (BHK)", min_value=1, max_value=10, value=2)
+
+# --- CRITICAL FIX: STOP ERROR IF EMPTY ---
+# If user hasn't selected a location yet, don't show the rest of the app or run prediction
+if selected_region is None:
+    st.info("👈 Please search for a location to begin.")
+    st.stop() # Stops the code here until they pick something
 
 st.write("**📏 Total Area (Sq Ft)**")
 area = st.slider("Adjust Area", min_value=500, max_value=5000, value=1000, step=50, label_visibility="collapsed")
