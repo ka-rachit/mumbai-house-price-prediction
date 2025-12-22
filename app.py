@@ -5,86 +5,81 @@ import pandas as pd
 # --- 1. CONFIGURATION ---
 st.set_page_config(page_title="Mumbai House Price Predictor", layout="centered")
 
-# --- 2. FINAL CSS FIX (FORCE WHITE THEME EVERYWHERE) ---
+# --- 2. THE FIX: NUCLEAR CSS FOR COLORS ---
 st.markdown("""
     <style>
-    /* 1. Main Background */
+    /* 1. Main Page Background */
     .stApp {
         background-color: #FFFFFF;
         color: #000000;
     }
 
-    /* 2. Text Colors (Headings, Labels, Paragraphs) */
-    h1, h2, h3, h4, h5, h6, p, div, label, span {
+    /* 2. FORCE ALL TEXT TO BLACK */
+    h1, h2, h3, h4, h5, h6, p, label, span, div {
         color: #000000 !important;
     }
-    
-    /* 3. Input Boxes (Dropdowns & Number Inputs) - FORCE WHITE BACKGROUND */
+
+    /* 3. INPUT BOXES (The box you type in) */
     .stSelectbox div[data-baseweb="select"] > div,
     .stNumberInput div[data-baseweb="input"] > div {
-        background-color: #F0F2F6 !important; /* Light Grey for input box */
-        color: #000000 !important;
+        background-color: #F0F2F6 !important; /* Light Grey Background */
+        color: #000000 !important;             /* Black Text */
         border-color: #CCCCCC !important;
     }
     
-    /* 4. Text INSIDE Input Boxes */
-    input[type="text"], input[type="number"] {
-        color: #000000 !important;
-        background-color: transparent !important; /* Let parent background show */
-    }
-
-    /* 5. Dropdown Menu Items (When you click the list) */
-    ul[data-baseweb="menu"] {
+    /* 4. THE DROPDOWN MENU LIST (The part that was black-on-black) */
+    /* Target the container of the list */
+    div[data-baseweb="popover"] > div {
         background-color: #FFFFFF !important;
     }
-    li[data-baseweb="option"] {
-        color: #000000 !important; 
+    /* Target the items inside the list */
+    ul[data-baseweb="menu"] li {
+        background-color: #FFFFFF !important; /* White Background */
+        color: #000000 !important;            /* Black Text */
     }
-    
-    /* 6. Fix for Placeholder Text (The "Type to search..." text) */
-    div[data-baseweb="select"] span {
-        color: #555555 !important; /* Dark Grey for placeholder */
+    /* Target the highlighted item (when you hover) */
+    ul[data-baseweb="menu"] li[aria-selected="true"], 
+    ul[data-baseweb="menu"] li:hover {
+        background-color: #007BFF !important; /* Blue Background */
+        color: #FFFFFF !important;            /* White Text */
     }
 
-    /* 7. Buttons */
+    /* 5. Placeholder Text ("Type to search...") */
+    div[data-baseweb="select"] span {
+        color: #555555 !important;
+    }
+
+    /* 6. Buttons */
     .stButton>button {
         background-color: #007BFF !important;
         color: white !important;
         border: none;
-        font-weight: bold;
-    }
-    .stButton>button:hover {
-        background-color: #0056b3 !important;
-    }
-
-    /* 8. Slider Color */
-    div.stSlider > div[data-baseweb="slider"] > div > div > div[role="slider"] {
-        background-color: #007BFF !important;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# --- 3. LOAD DATA & MODEL ---
+# --- 3. LOAD RESOURCES ---
 @st.cache_resource
 def load_resources():
-    model = joblib.load('model_advanced.pkl')
-    # Load CSV to get the list of REGIONS
-    df = pd.read_csv('cleaned_data_v2.csv')
-    df['region'] = df['region'].astype(str)
-    df = df[df['region'].str.lower() != 'nan']
-    regions = sorted(df['region'].unique().tolist())
-    return model, regions
+    try:
+        model = joblib.load('model_advanced.pkl')
+        df = pd.read_csv('cleaned_data_v2.csv')
+        df['region'] = df['region'].astype(str)
+        df = df[df['region'].str.lower() != 'nan']
+        regions = sorted(df['region'].unique().tolist())
+        return model, regions
+    except Exception as e:
+        return None, []
 
-try:
-    model, region_options = load_resources()
-except Exception as e:
-    st.error(f"Error loading files: {e}")
+model, region_options = load_resources()
+
+if model is None:
+    st.error("Error loading files. Please ensure 'model_advanced.pkl' and 'cleaned_data_v2.csv' are in the GitHub folder.")
     st.stop()
 
-# --- 4. HELPER: CURRENCY FORMATTER ---
+# --- 4. HELPER FUNCTION ---
 def format_currency(value):
     val_lakhs = value
-    val_actual = val_lakhs * 100000
     if val_lakhs >= 100:
         return f"₹ {val_lakhs/100:.2f} Cr"
     else:
@@ -98,12 +93,11 @@ st.write("---")
 col1, col2 = st.columns(2)
 
 with col1:
-    # SEARCHABLE DROPDOWN
     selected_region = st.selectbox(
         "📍 Select Location", 
         region_options, 
         index=None, 
-        placeholder="Type to search (e.g. Bandra)..."
+        placeholder="Type to search..."
     )
 
 with col2:
@@ -121,7 +115,6 @@ if selected_region is None:
 st.markdown("---")
 
 if st.button("Calculate Value", use_container_width=True):
-    # Input must use 'region' column name to match training
     input_data = pd.DataFrame([[selected_region, area, bhk]], 
                               columns=['region', 'area', 'bhk'])
     
