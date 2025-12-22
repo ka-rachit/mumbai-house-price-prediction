@@ -36,33 +36,30 @@ st.markdown("""
         color: #555;
         margin-bottom: 20px;
     }
+    /* Make the slider blue */
+    div.stSlider > div[data-baseweb="slider"] > div > div > div[role="slider"]{
+        background-color: #007BFF;
+    }
     </style>
 """, unsafe_allow_html=True)
 
 # --- 3. HELPER FUNCTION: INDIAN CURRENCY FORMATTER ---
 def format_indian_currency(lakhs_val):
-    # Convert prediction (which is in Lakhs) to actual Rupee value
     actual_value = float(lakhs_val * 100000)
     
-    # 1. CREATE THE READABLE LABEL (Cr or Lakhs)
     if lakhs_val >= 100:
         readable_text = f"{lakhs_val / 100:.2f} Cr"
     else:
         readable_text = f"{lakhs_val:.2f} Lakhs"
     
-    # 2. CREATE THE COMMA NUMBER (e.g., 45,32,786)
-    # Standard Python uses US commas (1,000,000), which is close enough for an MVP
-    # If you want strict Indian commas (10,00,000), it requires complex regex, 
-    # so we use the standard helper for reliability.
     comma_text = "{:,.0f}".format(actual_value)
-    
     return comma_text, readable_text
 
 # --- 4. LOAD MODEL ---
 try:
     model = joblib.load('model_upgraded.pkl')
 except:
-    st.error("Error: 'model_upgraded.pkl' not found. Please run the training script first.")
+    st.error("Error: 'model_upgraded.pkl' not found.")
     st.stop()
 
 # --- 5. APP UI ---
@@ -70,20 +67,21 @@ st.title("🏡 Mumbai House Price Predictor")
 st.markdown('<p class="subtitle">AI-Powered Real Estate Valuation Engine</p>', unsafe_allow_html=True)
 
 st.write("### Enter Property Details")
-st.write("Adjust the values below to get an instant valuation.")
+st.write("Adjust the slider and values below to get an instant valuation.")
 
-# Create two columns for a better layout
-col1, col2 = st.columns(2)
+# --- INPUT SECTION ---
+# 1. SLIDER for Area (This is the fix)
+st.write("**Total Area (Sq Ft)**")
+area = st.slider("Move slider to adjust area", min_value=100, max_value=5000, value=1000, step=50, label_visibility="collapsed")
+st.caption(f"Selected Area: **{area} Sq Ft**")
 
-with col1:
-    area = st.number_input("Total Area (Sq Ft)", min_value=100, max_value=10000, value=1000, step=50)
+# 2. NUMBER INPUT for Bedrooms (Better than slider for small numbers)
+st.write("**Bedrooms (BHK)**")
+bhk = st.number_input("Select BHK", min_value=1, max_value=10, value=2, step=1, label_visibility="collapsed")
 
-with col2:
-    bhk = st.number_input("Bedrooms (BHK)", min_value=1, max_value=10, value=2, step=1)
+st.markdown("---") 
 
-st.markdown("---") # A divider line
-
-# Center the button using columns
+# Center the button
 _, mid_col, _ = st.columns([1, 2, 1])
 
 with mid_col:
@@ -91,16 +89,11 @@ with mid_col:
 
 # --- 6. PREDICTION LOGIC ---
 if predict_btn:
-    # Prepare input
     input_data = pd.DataFrame([[area, bhk]], columns=['area', 'bhk'])
-    
-    # Predict
     prediction_lakhs = model.predict(input_data)[0]
     
-    # Format
     comma_price, readable_price = format_indian_currency(prediction_lakhs)
     
-    # Display Result
     st.markdown(f"""
         <div style="background-color: #f0f8ff; padding: 20px; border-radius: 10px; border-left: 5px solid #007BFF; text-align: center;">
             <h3 style="margin:0; color: #007BFF;">Estimated Value</h3>
