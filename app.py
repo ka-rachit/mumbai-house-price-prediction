@@ -6,14 +6,44 @@ import pandas as pd
 st.set_page_config(page_title="Mumbai House Price Predictor", layout="centered")
 
 # --- CUSTOM CSS ---
+# --- 2. CUSTOM STYLING (Blue & White & FORCE BLACK TEXT) ---
 st.markdown("""
     <style>
-    .stApp { background-color: #FFFFFF; color: #000000; }
-    h1 { color: #007BFF; text-align: center; }
-    .stButton>button { background-color: #007BFF; color: white; border-radius: 5px; }
-    .stButton>button:hover { background-color: #0056b3; color: white; }
+    /* Force the main app background to be white */
+    .stApp { 
+        background-color: #FFFFFF; 
+    }
+    
+    /* Force all text to be dark grey/black */
+    h1, h2, h3, h4, h5, h6, p, div, span, label {
+        color: #000000 !important;
+    }
+    
+    /* Specific fix for the input labels (Location, BHK) */
+    .stSelectbox label, .stNumberInput label, .stSlider label {
+        color: #333333 !important;
+    }
+
+    /* Style the buttons to be Blue */
+    .stButton>button { 
+        background-color: #007BFF; 
+        color: white !important; /* Force button text white */
+        border-radius: 5px; 
+        border: none;
+    }
+    .stButton>button:hover { 
+        background-color: #0056b3; 
+        color: white !important; 
+    }
+    
+    /* Style the slider to be blue */
     div.stSlider > div[data-baseweb="slider"] > div > div > div[role="slider"]{
         background-color: #007BFF;
+    }
+    
+    /* Fix the color of the slider text (min/max values) */
+    div[data-testid="stMarkdownContainer"] p {
+        color: #333333 !important;
     }
     </style>
 """, unsafe_allow_html=True)
