@@ -11,7 +11,7 @@ A Machine Learning powered web application that estimates residential property p
 ## 📸 Screenshots
 
 *(Add a screenshot of your app here)*
-
+<img width="394" height="408" alt="Image" src="https://github.com/user-attachments/assets/fd133044-b2da-4d31-87f7-57af179373bb" />
 ---
 
 ## 🧠 The Intelligence (How it Works)
